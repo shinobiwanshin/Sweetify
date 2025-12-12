@@ -36,10 +36,22 @@ public class SweetService {
     }
 
     public Sweet restockSweet(Long id, Integer quantity) {
-        Sweet sweet = sweetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sweet not found"));
-
+        Sweet sweet = sweetRepository.findById(id).orElseThrow(() -> new RuntimeException("Sweet not found"));
         sweet.setQuantity(sweet.getQuantity() + quantity);
         return sweetRepository.save(sweet);
+    }
+
+    public Sweet updateSweet(Long id, Sweet sweetDetails) {
+        Sweet sweet = sweetRepository.findById(id).orElseThrow(() -> new RuntimeException("Sweet not found"));
+        sweet.setName(sweetDetails.getName());
+        sweet.setCategory(sweetDetails.getCategory());
+        sweet.setPrice(sweetDetails.getPrice());
+        sweet.setQuantity(sweetDetails.getQuantity());
+        return sweetRepository.save(sweet);
+    }
+
+    public void deleteSweet(Long id) {
+        Sweet sweet = sweetRepository.findById(id).orElseThrow(() -> new RuntimeException("Sweet not found"));
+        sweetRepository.delete(sweet);
     }
 }
