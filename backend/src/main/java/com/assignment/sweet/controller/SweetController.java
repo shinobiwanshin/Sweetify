@@ -23,20 +23,40 @@ public class SweetController {
         return ResponseEntity.ok(sweetService.getAllSweets());
     }
 
-    @PostMapping
+    @PostMapping(consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Sweet> addSweet(@RequestBody Sweet sweet) {
-        return ResponseEntity.ok(sweetService.addSweet(sweet));
+    public ResponseEntity<Sweet> addSweet(
+            @RequestPart("sweet") Sweet sweet,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image) {
+        return ResponseEntity.ok(sweetService.addSweet(sweet, image));
     }
 
     @PostMapping("/{id}/purchase")
-    public ResponseEntity<Sweet> purchaseSweet(@PathVariable Long id) {
-        return ResponseEntity.ok(sweetService.purchaseSweet(id));
+    public ResponseEntity<Sweet> purchaseSweet(@PathVariable Long id,
+            org.springframework.security.core.Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(sweetService.purchaseSweet(id, email));
     }
 
     @PostMapping("/{id}/restock")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Sweet> restockSweet(@PathVariable Long id, @RequestBody Integer quantity) {
         return ResponseEntity.ok(sweetService.restockSweet(id, quantity));
+    }
+
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Sweet> updateSweet(
+            @PathVariable Long id,
+            @RequestPart("sweet") Sweet sweet,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image) {
+        return ResponseEntity.ok(sweetService.updateSweet(id, sweet, image));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteSweet(@PathVariable Long id) {
+        sweetService.deleteSweet(id);
+        return ResponseEntity.noContent().build();
     }
 }

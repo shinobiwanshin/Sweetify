@@ -38,6 +38,8 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        extraClaims.put("role", userDetails.getAuthorities().stream()
+                .findFirst().get().getAuthority().replace("ROLE_", ""));
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
