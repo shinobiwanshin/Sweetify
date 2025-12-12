@@ -10,20 +10,32 @@ import java.util.List;
 public class SweetService {
 
     private final SweetRepository sweetRepository;
+    private final ImageService imageService;
+    private final com.assignment.sweet.repository.PurchaseRepository purchaseRepository;
 
-    public SweetService(SweetRepository sweetRepository) {
+    public SweetService(SweetRepository sweetRepository, ImageService imageService,
+            com.assignment.sweet.repository.PurchaseRepository purchaseRepository) {
         this.sweetRepository = sweetRepository;
+        this.imageService = imageService;
+        this.purchaseRepository = purchaseRepository;
     }
 
     public List<Sweet> getAllSweets() {
         return sweetRepository.findAll();
     }
 
-    public Sweet addSweet(Sweet sweet) {
+    public Sweet addSweet(Sweet sweet, org.springframework.web.multipart.MultipartFile imageFile) {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = imageService.storeFile(imageFile);
+            // Assuming the server runs on localhost:8080. In prod, this should be
+            // configurable.
+            sweet.setImageUrl("http://localhost:8080/uploads/" + fileName);
+        }
         return sweetRepository.save(sweet);
     }
 
-    public Sweet purchaseSweet(Long id) {
+    public Sweet purchaseSweet(Long id, String customerEmail) {
+        System.out.println("DEBUG: Purchasing sweet " + id + " for user: " + customerEmail);
         Sweet sweet = sweetRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sweet not found"));
 
@@ -32,7 +44,20 @@ public class SweetService {
         }
 
         sweet.setQuantity(sweet.getQuantity() - 1);
-        return sweetRepository.save(sweet);
+        Sweet savedSweet = sweetRepository.save(sweet);
+
+        // Record purchase
+        com.assignment.sweet.model.Purchase purchase = new com.assignment.sweet.model.Purchase();
+        purchase.setSweetId(savedSweet.getId());
+        purchase.setSweetName(savedSweet.getName());
+        purchase.setQuantity(1);
+        purchase.setPricePerUnit(savedSweet.getPrice());
+        purchase.setTotalPrice(savedSweet.getPrice());
+        purchase.setCustomerEmail(customerEmail);
+        purchaseRepository.save(purchase);
+        System.out.println("DEBUG: Purchase saved for " + customerEmail);
+
+        return savedSweet;
     }
 
     public Sweet restockSweet(Long id, Integer quantity) {
@@ -41,14 +66,24 @@ public class SweetService {
         return sweetRepository.save(sweet);
     }
 
-    public Sweet updateSweet(Long id, Sweet sweetDetails) {
+    public Sweet updateSweet(Long id, Sweet sweetDetails, org.springframework.web.multipart.MultipartFile imageFile) {
         Sweet sweet = sweetRepository.findById(id).orElseThrow(() -> new RuntimeException("Sweet not found"));
         sweet.setName(sweetDetails.getName());
         sweet.setCategory(sweetDetails.getCategory());
         sweet.setPrice(sweetDetails.getPrice());
         sweet.setQuantity(sweetDetails.getQuantity());
         sweet.setDescription(sweetDetails.getDescription());
-        sweet.setImageUrl(sweetDetails.getImageUrl());
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = imageService.storeFile(imageFile);
+            sweet.setImageUrl("http://localhost:8080/uploads/" + fileName);
+        } else if (sweetDetails.getImageUrl() != null) {
+            // If no new file, but URL is provided (e.g. keeping existing), update it.
+            // However, usually we just keep existing if null.
+            // But if user explicitly clears it? Let's assume if URL is passed, use it.
+            sweet.setImageUrl(sweetDetails.getImageUrl());
+        }
+
         return sweetRepository.save(sweet);
     }
 

@@ -2,7 +2,13 @@ import React from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { ShoppingCart, Package, Pencil, Trash2 } from "lucide-react";
+import {
+  ShoppingCart,
+  Package,
+  Pencil,
+  Trash2,
+  PackagePlus,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../lib/utils";
 
@@ -23,6 +29,7 @@ export default function SweetCard({
   onPurchase,
   onEdit,
   onDelete,
+  onRestock,
   isAdmin,
 }) {
   const isOutOfStock = sweet.quantity === 0;
@@ -37,9 +44,9 @@ export default function SweetCard({
     >
       <Card className="overflow-hidden h-full flex flex-col bg-white hover:shadow-xl transition-shadow duration-300 border border-gray-100">
         <div className="relative h-48 bg-gradient-to-br from-rose-50 to-amber-50 overflow-hidden">
-          {sweet.image_url ? (
+          {sweet.imageUrl ? (
             <img
-              src={sweet.image_url}
+              src={sweet.imageUrl}
               alt={sweet.name}
               className="w-full h-full object-cover"
             />
@@ -113,17 +120,28 @@ export default function SweetCard({
             ) : (
               <>
                 <Button
+                  onClick={() => onRestock(sweet.id)}
+                  variant="outline"
+                  className="flex-1 border-emerald-200 hover:bg-emerald-50 text-emerald-700"
+                >
+                  <PackagePlus className="w-4 h-4 mr-2" />
+                  Restock
+                </Button>
+                <Button
                   onClick={() => onEdit(sweet)}
                   variant="outline"
-                  className="flex-1 border-rose-200 hover:bg-rose-50"
+                  size="icon"
+                  className="border-rose-200 hover:bg-rose-50"
+                  title="Edit"
                 >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
+                  <Pencil className="w-4 h-4" />
                 </Button>
                 <Button
                   onClick={() => onDelete(sweet.id)}
                   variant="outline"
+                  size="icon"
                   className="border-red-200 hover:bg-red-50 text-red-600"
+                  title="Delete"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

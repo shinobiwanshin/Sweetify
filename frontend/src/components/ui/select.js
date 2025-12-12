@@ -21,7 +21,7 @@ const Select = ({ children, value, onValueChange }) => {
   );
 };
 
-const SelectTrigger = ({ children, className, isOpen, setIsOpen }) => (
+const SelectTrigger = ({ children, className, isOpen, setIsOpen, value }) => (
   <button
     type="button"
     onClick={() => setIsOpen(!isOpen)}
@@ -30,7 +30,12 @@ const SelectTrigger = ({ children, className, isOpen, setIsOpen }) => (
       className
     )}
   >
-    {children}
+    {React.Children.map(children, (child) => {
+      if (React.isValidElement(child)) {
+        return React.cloneElement(child, { value });
+      }
+      return child;
+    })}
   </button>
 );
 
