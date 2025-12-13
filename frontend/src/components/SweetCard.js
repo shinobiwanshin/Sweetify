@@ -10,7 +10,7 @@ import {
   PackagePlus,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "../lib/utils";
+import { cn, getImageUrl } from "../lib/utils";
 
 const categoryColors = {
   chocolate: "bg-amber-100 text-amber-800 border-amber-200",
@@ -46,7 +46,7 @@ export default function SweetCard({
         <div className="relative h-48 bg-gradient-to-br from-rose-50 to-amber-50 overflow-hidden">
           {sweet.imageUrl ? (
             <img
-              src={sweet.imageUrl}
+              src={getImageUrl(sweet.imageUrl)}
               alt={sweet.name}
               className="w-full h-full object-cover"
             />
