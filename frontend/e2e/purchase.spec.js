@@ -1,20 +1,20 @@
 const { test, expect } = require("@playwright/test");
+const { fillAuthForm } = require("./helpers/auth");
 
 test.describe("Purchase Flow", () => {
   test("should allow a user to purchase a sweet", async ({ page }) => {
     const email = `buyer_${Date.now()}@example.com`;
     const password = "password123";
 
-    // 1. Register and Login
+    // 1. Register and Login (adaptive to Clerk or dev form)
     await page.goto("/register");
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/\/login/);
+    await fillAuthForm(page, email, password);
 
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    await page.click('button[type="submit"]');
+    // Login
+    await page.goto("/login");
+    await fillAuthForm(page, email, password);
+
+    // Should redirect to home/shop
     await expect(page).toHaveURL("/");
 
     // 2. Browse Shop and Select Item

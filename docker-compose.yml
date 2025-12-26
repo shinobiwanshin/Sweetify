@@ -10,15 +10,25 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY:-}
+      - CLERK_JWKS_URI=${CLERK_JWKS_URI:-}
+      - CLERK_WEBHOOK_SECRET=${CLERK_WEBHOOK_SECRET:-}
     depends_on:
       - db
     networks:
       - sweet-network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_CLERK_PUBLISHABLE_KEY: ${REACT_APP_CLERK_PUBLISHABLE_KEY}
+        REACT_APP_ENABLE_DEV_REGISTER: ${REACT_APP_ENABLE_DEV_REGISTER}
     ports:
       - "3000:80"
+    environment:
+      - REACT_APP_CLERK_PUBLISHABLE_KEY=${REACT_APP_CLERK_PUBLISHABLE_KEY}
+      - REACT_APP_ENABLE_DEV_REGISTER=${REACT_APP_ENABLE_DEV_REGISTER}
     depends_on:
       - backend
     networks:

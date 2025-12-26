@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { fillAuthForm } = require("./helpers/auth");
 
 test.describe("Authentication Flow", () => {
   test("should allow a user to register and login", async ({ page }) => {
@@ -7,17 +8,14 @@ test.describe("Authentication Flow", () => {
 
     // Register
     await page.goto("/register");
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    await page.click('button[type="submit"]');
+    await fillAuthForm(page, email, password);
 
     // Should redirect to login
     await expect(page).toHaveURL(/\/login/);
 
-    // Login
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    await page.click('button[type="submit"]');
+    // Login - same adaptive approach
+    await page.goto("/login");
+    await fillAuthForm(page, email, password);
 
     // Should redirect to home/shop
     await expect(page).toHaveURL("/");
